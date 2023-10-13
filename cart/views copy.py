@@ -50,72 +50,55 @@ def add_to_cart1(request, product_id):
 
 def add_to_cart(request, product_id):
 
-    # cart_items = {}
+    cart_items = {}
     product = Store.objects.get(id=product_id) # Get a product
-    # cart = Cart.objects.get(cart_id = _get_cart_id(request))
+    cart = None
 
     if request.user.is_authenticated:
-
-        # User's Cart existing
         try:
-            cart = Cart.objects.get(user = request.user)
-            cart = cart
-            try:
-                cart_item = CartItem.objects.get(product=product, user=request.user)
-                cart_item.quantity += 1
-                cart_item.save()       
-                
-            except CartItem.DoesNotExist:                
-                cart_item = CartItem.objects.create(
-                    product = product,
-                    cart = cart,
-                    user = request.user,
-                    quantity = 1
-                )
-                cart_item.save()    
-        # Create New user's Cart 
-        except Cart.DoesNotExist:
-            cart = Cart.objects.create(cart_id = _get_cart_id(request))
-            try:
-                cart_item = CartItem.objects.all().get(product=product, cart = cart)
-                cart_item.quantity += 1
-                cart_item.save()       
-                
-            except CartItem.DoesNotExist:
-                
-                cart_item = CartItem.objects.create(
-                    product = product,
-                    cart = cart,
-                    user = request.user,
-                    quantity = 1
-                )
-                cart_item.save()     
-
+            carts = Cart.objects.all().filter(user=request.user)
             
+        except Cart.DoesNotExist:
+            cart = Cart.objects.create(
+                cart_id = _get_cart_id(request),
+            ) 
+            cart.user = request.user
+            cart.save()
+
+        for cart in carts:
+            cart_items = list(chain(cart_items, CartItem.objects.filter(cart = cart)))
+                
     else:
         try:
             cart = Cart.objects.get(cart_id = _get_cart_id(request))
-            try:
-                cart_item = CartItem.objects.get(cart=cart, product=product)
-                cart_item.quantity += 1    
-                cart_item.save()
-
-            except CartItem.DoesNotExist:    
-                cart_item = CartItem.objects.create(
-                            product = product,
-                            cart = cart,
-                            quantity = 1
-                            )
-                cart_item.save()       
         except Cart.DoesNotExist:
-            cart = Cart.objects.create(cart_id = _get_cart_id(request))
+            cart = Cart.objects.create(
+                cart_id = _get_cart_id(request)
+                )
             cart.save()
+        
+        cart_items = CartItem.objects.filter(cart = cart)
+                
+    try:        
+        cart_item =  CartItem.objects.get(product = product)
+        if cart_item in cart_items:
+            cart_item.quantity += 1
+            cart_item.save()
+        else:
             cart_item = CartItem.objects.create(
-                        product = product,
-                        cart = cart,
-                        quantity = 1
-                        )
-            cart_item.save()  
+                product = product,
+                cart = cart,
+                quantity = 1
+            )
+        cart_item.save()
+
+    except CartItem.DoesNotExist:
+        cart_item = CartItem.objects.create(
+            product = product,
+            cart = cart,
+            quantity = 1
+        )
+        cart_item.save()
 
     return redirect('cart')
 
@@ -188,7 +171,10 @@ def remove_item_cart(request, product_id):
 def cart(request, total=0, quantity=0, tax= 0, grand_total=0, cart_items={}):
     
     if request.user.is_authenticated:
-        cart_items = CartItem.objects.all().filter(user=request.user)
+        carts = Cart.objects.all().filter(user=request.user)
+        for cart in carts:
+            # cart_items = CartItem.objects.all().filter(cart = cart[:1], is_active = True)
+            cart_items = list(chain(cart_items, CartItem.objects.all().filter(cart = cart, is_active = True)))
     else:
         cart = Cart.objects.all().filter(cart_id = _get_cart_id(request))
         cart_items= CartItem.objects.filter(cart = cart[:1], is_active = True)

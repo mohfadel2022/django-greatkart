@@ -1,13 +1,15 @@
 from collections.abc import Mapping
 from typing import Any
+
 from django import forms
+from django.forms import ModelForm, TextInput, EmailInput
+from django.forms.utils import ErrorList
 from django.core.files.base import File
 from django.db.models.base import Model
-from django.forms.utils import ErrorList
+
 from .models import Account
 
 
-from django.forms import ModelForm, TextInput, EmailInput
 
 class RegistrationForm(forms.ModelForm):
 

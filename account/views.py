@@ -3,7 +3,9 @@ from .forms import RegistrationForm
 from .models import Account
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponseBadRequest
+
+import requests
 
 # Verfication email
 from django.contrib.sites.shortcuts import  get_current_site
@@ -13,6 +15,8 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 
+from cart.models import Cart, CartItem
+from cart.views import _get_cart_id
 
 def register(request):
     if request.method == 'POST':
@@ -61,21 +65,77 @@ def register(request):
     return render(request, 'account/register.html', context)
 
 def login(request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
+        
+        if request.method == 'POST':
+            email = request.POST['email']
+            password = request.POST['password']
 
-        user = auth.authenticate(email=email, password=password)
+            user = auth.authenticate(email=email, password=password)
 
-        if user is not None:
-            auth.login(request, user)
-            messages.success(request, "Your are successful logged in.")
-            return redirect('dashboard')
-        else:            
-            messages.error(request, "Invalid username o password")
-            return redirect('login')
+            if user is not None:
+                try:
+                    cart_current = Cart.objects.get(cart_id = _get_cart_id(request))
+                    
+                    try:
+                        carts= Cart.objects.all()
+                        cart_user = None
+                        for cart in carts:
+                            if cart.user == user:
+                                cart_user = cart
+                                break
+                        cart_current_items = CartItem.objects.filter(cart=cart_current)
+                        if cart_user is not None:
+                            for cart_item in cart_current_items:
+                                try:
+                                    cart_item_user = CartItem.objects.all().get(product=cart_item.product, cart = cart_user)
+                                    cart_item_user.quantity += 1
+                                    cart_item.delete()
+                                    cart_item_user.save()
+                                except CartItem.DoesNotExist:
+                                    cart_item.user = user
+                                    cart_item.cart = cart_user
+                                    cart_item.save()
+                            cart_current.delete()
+                        else:
+                            cart_current.user  = user
+                            cart_current.save()
+                            for cart_item in cart_current_items:
+                                cart_item.user = user
+                                cart_item.save()
 
-    return render(request, 'account/login.html')
+                    except Cart.DoesNotExist:
+                        print('except')
+                        # cart_current = Cart.objects.get(cart_id = _get_cart_id(request))
+                        cart_items = CartItem.objects.all().filter(cart=cart_current)
+                        for cart_item in cart_items:
+                            cart_item.user = user
+                            cart_item.save()
+                except Cart.DoesNotExist:
+                    pass
+            
+                auth.login(request, user)
+                messages.success(request, "Your are successful logged in.")
+                
+                url = request.META.get('HTTP_REFERER')
+                try:
+                    query = requests.utils.urlparse(url).query
+                    params = dict(x.split('=') for x in query.split('&'))
+                    if 'next' in params:
+                        next_p = params['next']
+                        return redirect (next_p)
+                    else:
+                        return redirect('dashboard')
+
+                except:
+                    return redirect('dashboard')
+                    
+                
+            else:
+                messages.error(request, "Invalid username o password")
+                return redirect('login')
+            
+        return render(request, 'account/login.html')
+        
 
 @login_required(login_url = 'login')
 def logout(request):
