@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'account',
     'store',
     'cart',
+    'order'
 ]
 
 MIDDLEWARE = [
@@ -113,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Madrid'
 
 USE_I18N = True
 
@@ -151,3 +152,9 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'mohfadel2016@gmail.com'
 EMAIL_HOST_PASSWORD = 'ncndcyvrcrafsmih'
 EMAIL_USE_TLS = True
+
+
+
+# PAYPAL SETTINGS
+PAYPAL_CLIENT_ID='AZXXb1pyl_wLAeQN_jsrE3NEk2nsHtrGQVn1LNiLi-aSwunlYBvrntxFJvZrrv7db6DH1XuvOEue5W3e'
+PAYPAL_CLIENT_SECRET='EHANixP_ostRyFaZQ57CR8fYRLcnqCbrFfl5wRtBs6ETN8FXwdnfdDzS3nes4F4HUfrxH603-D1bDdhX'

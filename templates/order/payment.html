@@ -1,0 +1,172 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+
+<section class="section-content padding-y bg">
+    <div class="container">
+        <div class="py-4 text-center">
+            <h2>Payment form</h2>        
+        </div>
+    
+        <div>   
+            <form class="needs-validation row" novalidate method="POST" action="{% url 'payment' %}">
+                {% csrf_token %}
+                <!-- ========================= PAYMENT INFORMATION ========================= -->
+                
+                <div class="col-md-8 order-md-2 mb-4">  
+                    <div class="card mb-4">
+                        <div class="card-header">Billing Information</div>
+                        <div class="card-body">
+                            <p class="card-text mb-0">{{order.full_name}}</p>
+                            <p class="card-text mb-0">{{order.full_address}}</p>
+                            <p class="card-text mb-0">{{order.city}}, {{order.state}}</p>
+                            <p class="card-text mb-0">{{order.country}}</p>
+                            <p class="card-text mb-0">{{order.email}}</p>
+                            <p class="card-text mb-0">{{order.phone}}</p>
+                            {% if order.order_note %}
+                                <b>Order Note:</b> {{ order.order_note }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header">Payment Method</div> 
+                        <div class="card-body">
+                            <div class="d-block my-3">
+                                <p class="text-center mb-3">
+                                    <img src="{% static './images/misc/payments.png' %}" height="26" />
+                                </p>
+                                <div class="custom-control custom-radio">
+                                    <input id="credit" name="paymentMethod" type="radio" class="custom-control-input" checked
+                                        required>
+                                    <label class="custom-control-label" for="credit">Credit card</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input id="debit" name="paymentMethod" type="radio" class="custom-control-input" required>
+                                    <label class="custom-control-label" for="debit">Debit card</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input id="paypal" name="paymentMethod" type="radio" class="custom-control-input" required>
+                                    <label class="custom-control-label" for="paypal">PayPal</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <input type="text" class="form-control" name="cc-name" placeholder="Name on card" required>
+                                    <small class="text-muted">Full name as displayed on card</small>
+                                    <div class="invalid-feedback">
+                                        Name on card is required
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <input type="text" class="form-control" name="cc-number" placeholder="Credit card number" required>
+                                    <div class="invalid-feedback">
+                                        Credit card number is required
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <input type="text" class="form-control" name="cc-expiration" placeholder="Expiration" required>
+                                    <div class="invalid-feedback">
+                                        Expiration date required
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <input type="text" class="form-control" name="cc-cvv" placeholder="CVV" required>
+                                    <div class="invalid-feedback">
+                                        Security code required
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="mb-4">
+                        </div>
+                    </div>
+                </div>
+                <!-- ========================= PAYMENT INFORMATION END// ========================= -->
+
+                <!-- ========================= CART DETAIL ========================= -->
+                <div class="col-md-4 order-md-2 mb-4 " >
+                    <h5 class="card mb-3 p-3">Payment Detail
+                    </h5>
+                    <div class="list-group mb-3 card">                  
+                        <dl class="list-group-item d-flex justify-content-between bg-light">
+                            <figcaption class="info ">
+                                <div class="text-success">
+                                    <h6 class="my-0">Promo code</h6>
+                                    <small>EXAMPLECODE</small>
+                                </div>
+                            </figcaption>
+                            <span class="text-success">-$5</span>
+                        </dl>
+                        <dl class="list-group-item d-flex justify-content-between">
+                            <dt>Sub Total (USD)</dt>
+                            <dd class="text-right">${{total}}</dd>
+                        </dl>
+                        <dl class="list-group-item d-flex justify-content-between">
+                            <dt>Tax (USD)</dt>
+                            <dd>${{tax}}</dd>
+                        </dl>
+                        <dl class="list-group-item d-flex justify-content-between">
+                            <dt>Total (USD)</dt>
+                            <dd>${{grand_total}}</dd>
+                        </dl>
+                    </div>
+        
+                    <div class="card p-2">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Promo code">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-secondary">Redeem</button>
+                            </div>
+                        </div>
+
+                        <hr class="mb-4">
+                        <button class="btn btn-primary btn-lg btn-block" type="submit">Make payment</button>
+                        <a href="{% url 'store' %}" class="btn btn-light btn-lg btn-block" type="submit">Continue shopping</a>
+
+                        <!-- ========================= Paypal Button ========================= -->
+
+                        <div class="mt-4" id="paypal-button-container"></div>
+                        <p id="result-message"></p>
+                        <!-- ========================= Paypal Button END/ ========================= -->
+
+                    </div>
+                </div>
+                <!-- ========================= CART DETAIL END ========================= -->
+
+            </form>
+        </div>  
+    </div>
+    <!-- container .//  -->
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+<script>
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    let amount = "{{ grand_total }}" 
+    let url = "{% url 'payment' %}"
+    let csrftoken = getCookie('csrftoken')
+    let orderId = "{{ order.order_number}}"
+    let paymentMethod = 'Paypal'
+    let order_complete_url = "{% url 'order_complete' %}"
+    
+</script>
+<!-- Paypal Script -->
+<script src="https://www.paypal.com/sdk/js?client-id=AZXXb1pyl_wLAeQN_jsrE3NEk2nsHtrGQVn1LNiLi-aSwunlYBvrntxFJvZrrv7db6DH1XuvOEue5W3e&components=buttons&enable-funding=card&disable-funding=sofort" data-namespace="paypal_sdk"></script>
+<script src="{% static 'js/paypal.js' %}"></script>
+
+
+{% endblock %}
