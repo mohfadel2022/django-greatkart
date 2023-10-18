@@ -34,7 +34,7 @@ class Order(models.Model):
     country = models.CharField(max_length=50)
     state = models.CharField(max_length=50)
     city = models.CharField(max_length=50)
-    order_note = models.CharField(max_length=100, blank=True)
+    order_note = models.TextField(max_length=100, blank=True)
     total = models.FloatField()
     tax = models.FloatField()
     status = models.CharField(max_length=10, choices=STATUS, default ='New')
@@ -54,10 +54,10 @@ class Order(models.Model):
         return self.order_number
     
 class OrderProduct(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True)
-    user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
-    product = models.ForeignKey(Store, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, null=True)
+    product = models.ForeignKey(Store, on_delete=models.CASCADE, null=True)
     quantity = models.IntegerField()
     product_price = models.FloatField()
     is_ordered = models.BooleanField(default=False)
