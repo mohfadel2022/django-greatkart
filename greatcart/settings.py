@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ts$p41go*0i55sk9w531@5ci_mrp*f-qoow@kuuhi_9(73f=#9'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default= True, cast=bool)
 
 ALLOWED_HOSTS = []
 
@@ -41,7 +43,8 @@ INSTALLED_APPS = [
     'account',
     'store',
     'cart',
-    'order'
+    'order',
+    'admin_honeypot'
 ]
 
 MIDDLEWARE = [
@@ -52,7 +55,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # -----
+    'django_session_timeout.middleware.SessionTimeoutMiddleware',
 ]
+
+# SESSION TIMEOUT SETTINGS
+SESSION_EXPIRE_SECONDS = 60
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
+LOGOUT_REDIRECT_URL = reverse_lazy('login')
+
 
 ROOT_URLCONF = 'greatcart.urls'
 
@@ -147,14 +158,16 @@ MESSAGE_TAGS = {
 }
 
 # SMTP Configuration
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'mohfadel2016@gmail.com'
-EMAIL_HOST_PASSWORD = 'ncndcyvrcrafsmih'
-EMAIL_USE_TLS = True
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
 
 
 
 # PAYPAL SETTINGS
 PAYPAL_CLIENT_ID='AZXXb1pyl_wLAeQN_jsrE3NEk2nsHtrGQVn1LNiLi-aSwunlYBvrntxFJvZrrv7db6DH1XuvOEue5W3e'
 PAYPAL_CLIENT_SECRET='EHANixP_ostRyFaZQ57CR8fYRLcnqCbrFfl5wRtBs6ETN8FXwdnfdDzS3nes4F4HUfrxH603-D1bDdhX'
+
+# NO_IMAGE = STATICFILES_DIRS / 'no_image.jpg'

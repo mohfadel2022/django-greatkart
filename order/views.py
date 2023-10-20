@@ -35,8 +35,6 @@ def place_order(request, total = 0, quantity = 0):
     if request.method == 'POST':
         form = OrderForm(request.POST)
 
-        
-
         if form.is_valid():            
             # save billing informations
             data = Order()
@@ -80,7 +78,8 @@ def place_order(request, total = 0, quantity = 0):
     
 
 def payment(request):
-    body = json.loads(request.body)
+    data = request.body.decode('utf-8')
+    body = json.loads(data)
     order = Order.objects.get(is_ordered=False, order_number=body['orderID'], user=request.user)
 
     # Save Transactions details inside Payment mode

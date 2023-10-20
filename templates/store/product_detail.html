@@ -11,12 +11,23 @@
       <div class="row no-gutters">
         <aside class="col-md-6">
           <article class="gallery-wrap">
-            <div class="img-big-wrap">
-              <a href="#"><img src="{{ product.images.url }}"></a>
+            <div class="img-big-wrap main-image">
+              <img src="{{ product.images.url }}">
             </div> <!-- img-big-wrap.// -->
-
+            
           </article> <!-- gallery-wrap .end// -->
+         
+          <ul class="thumb">
+            <li>
+              <a href="{{product.images.url}}" target="main-image" ><img src="{{product.images.url}}" alt="Prodcut image"></a>
+              {% for image in gallery %}
+              <a href="{{image.image.url}}" target="main-image" ><img src="{{image.image.url}}" alt="Prodcut image"></a>
+              {% endfor %}
+            </li> 
+              
+          </ul>          
         </aside>
+
         <main class="col-md-6 border-left">
           <article class="content-body">
 
@@ -172,7 +183,14 @@
   </div> <!-- container .//  -->
 </section>
 
-
+<script>
+  $(document).ready(function(){
+    $('.thumb a').click(function(e){
+      e.preventDefault()
+      $('.main-image img').attr('src', $(this).attr('href'))
+    })
+  })
+</script>
 <!-- ========================= SECTION CONTENT END// ========================= -->
 
 {% endblock %}

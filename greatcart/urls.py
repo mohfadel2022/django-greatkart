@@ -23,7 +23,12 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('admin/', admin.site.urls),
+    path('admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
+    # path(r'^admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
+    # path(r'^secret/', include(admin.site.urls)),
+    
+
+    path('secure_admin/', admin.site.urls),
     path('account/', include('account.urls')),
     path('store/', include('store.urls')),
     path('cart/', include('cart.urls')),

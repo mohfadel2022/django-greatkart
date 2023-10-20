@@ -35,6 +35,15 @@
 						<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
 						<div class="price mt-1">{{ product.price }}</div> <!-- price-wrap.// -->
 					</figcaption>
+					<div class="rating-star p-2">
+						<span>
+						  <i class="fa-star{% if product.average_rating == 0.5 %}-half-alt fa{% elif product.average_rating < 1 %} far{% else %} fa{% endif %}" aria-hidden="true"></i>
+						  <i class="fa-star{% if product.average_rating == 1.5 %}-half-alt fa{% elif product.average_rating < 2 %} far{% else %} fa{% endif %}" aria-hidden="true"></i>
+						  <i class="fa-star{% if product.average_rating == 2.5 %}-half-alt fa{% elif product.average_rating < 3 %} far{% else %} fa{% endif %}" aria-hidden="true"></i>
+						  <i class="fa-star{% if product.average_rating == 3.5 %}-half-alt fa{% elif product.average_rating < 4 %} far{% else %} fa{% endif %}" aria-hidden="true"></i>
+						  <i class="fa-star{% if product.average_rating == 4.5 %}-half-alt fa{% elif product.average_rating < 5 %} far{% else %} fa{% endif %}" aria-hidden="true"></i>
+						</span>
+					</div>
 				</div>
 			</div> <!-- col.// -->
 			{% endfor %}
